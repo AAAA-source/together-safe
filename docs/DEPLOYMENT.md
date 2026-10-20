@@ -75,6 +75,7 @@ git add scripts/build-standalone.mjs
 git add tests/game.test.js
 git add tests/runtime.test.js
 git add tests/harness.js
+git add tests/joystick.test.js
 git add tests/military.test.js
 git add tests/save-validation.test.js
 git add tests/standalone.test.js

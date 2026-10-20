@@ -143,14 +143,6 @@ test('actual canvas pointer handler targets the same marker on desktop and zoome
   assert.ok(h.nodes.get('dialog').open);assert.match(h.nodes.get('dialog-content').innerHTML,/先確認身邊的人/);
  }
 });
-test('held touch controls stop on release and blur, including after military shelter scenes',()=>{
- const s=content.initialState('military');s.stage='crisis';s.done=['military'];s.x=240;s.y=360;
- const h=harness(JSON.stringify(s),{mobile:true}),button=h.touchButtons.find(b=>b.dataset.dir==='right');
- button.onpointerdown({pointerId:1,preventDefault(){}});h.run('loop(40);loop(80)');assert.ok(h.state.x>240);
- button.handlers.pointerup();const stopped=h.state.x;h.run('loop(120);loop(160)');assert.equal(h.state.x,stopped);
- button.onpointerdown({pointerId:2,preventDefault(){}});h.windowHandlers.blur();h.run('loop(200)');assert.equal(h.state.x,stopped);
-});
-
 test('military departure and air-alert markers have separate labels and click areas',()=>{
  for(const mobile of [false,true])for(const id of ['door','mAlert']){
   const s=content.initialState('military');s.stage='crisis';s.chapter.airAlert=true;s.x=480;s.y=420;s.done=['military','mFamily','mSignal','mBroadcast'];
