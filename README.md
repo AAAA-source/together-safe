@@ -28,10 +28,10 @@
 | --- | --- | --- |
 | 電腦鍵盤 | 方向鍵或 WASD | 靠近標記，按 E 或空白鍵 |
 | 滑鼠 | 點可通行的地面 | 點物件標記，角色會走近並互動 |
-| 手機／平板 | 拖曳地圖左下角的透明搖桿，或點地面 | 點互動標記，或使用「與附近物件互動」按鈕 |
+| 手機／平板 | 拖曳地圖下方的透明搖桿，或點地面 | 點互動標記，或使用「與附近物件互動」按鈕 |
 
 - 畫面上方的 **目前任務** 會告訴你下一步，也可以自行探索其他物件。
-- 手機搖桿可往任意方向拖曳，推得愈遠走得愈快；放手立即停止。拖出圓盤仍會追蹤手指，切換分頁、開啟對話或旋轉裝置會歸零。防空與暫時掩蔽期間停用移動。
+- 搖桿位於地圖下方的獨立操作區，不覆蓋地圖。手機搖桿可往任意方向拖曳，推得愈遠走得愈快；放手立即停止。拖出圓盤仍會追蹤手指，切換分頁、開啟對話或旋轉裝置會歸零。防空與暫時掩蔽期間停用移動。
 - **放大地圖／地圖總覽** 可切換觀看範圍，放大時畫面會跟著角色移動。
 - **平安行動簿** 記錄物品、家人狀況與已經做過的選擇。
 - 對話中的知識依據連結，可以帶你閱讀官方說明。
@@ -128,7 +128,7 @@
 **Together, Safe** is a browser-based 2D safety learning game for families. Start with the featured earthquake or civilian military-crisis chapter, or choose a random practice scenario.
 
 - Move with the arrow keys or WASD. Press E or Space near a marker to interact.
-- On touch devices, drag the translucent joystick at the bottom left of the map, or tap the ground or a marker. Release the joystick to stop.
+- On touch devices, drag the translucent joystick below the map, or tap the ground or a marker. Release the joystick to stop.
 - Follow the current task above the map. There is no reaction countdown.
 - Choose **English** in the language selector above each dialogue, then open **Google Translate** to read the current scene and choices in a new tab. Return to the original tab to play.
 - For more languages, choose **Other languages** and change the target language in Google Translate.
