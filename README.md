@@ -6,6 +6,12 @@
 
 **[開啟網頁遊戲](https://aaaa-source.github.io/together-safe/)** · **[下載單檔離線版](一起平安-離線版.html)** · [English quick guide](#english-quick-guide)
 
+用手機掃描 QR Code，即可開啟遊戲：
+
+<a href="https://aaaa-source.github.io/together-safe/">
+  <img src="qr-code.png" alt="掃描 QR Code 開啟「今天，也要一起平安」網頁遊戲" width="200">
+</a>
+
 > 本文件是玩家手冊。地震與軍事完整章節的新版內容，會在專案更新並成功部署後出現在網頁版。
 
 ## 第一次玩，從哪裡開始？
