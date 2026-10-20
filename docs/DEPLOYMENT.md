@@ -56,7 +56,25 @@ tests/
 ```sh
 cd "/Users/harryhsiao/Desktop/全民國防/together-safe"
 git init -b main
-git add .
+git add index.html
+git add style.css
+git add game.js
+git add content.js
+git add icon.svg
+git add sw.js
+git add manifest.webmanifest
+git add "一起平安-離線版.html"
+git add README.md
+git add LICENSE
+git add SOURCES.md
+git add docs/DEPLOYMENT.md
+git add docs/DEVELOPMENT.md
+git add package.json
+git add scripts/build-standalone.mjs
+git add tests/game.test.js
+git add tests/runtime.test.js
+git add tests/standalone.test.js
+git add .github/workflows/pages.yml
 git commit -m "Publish first playable version"
 git remote add origin https://github.com/YOUR_USERNAME/together-safe.git
 git push -u origin main
