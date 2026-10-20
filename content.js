@@ -43,7 +43,12 @@ export const EVENTS={
  backup:{title:'照片和重要資料的備份',text:'家人問：「如果手機突然壞掉，聯絡資料和重要檔案還找得到嗎？」',source:'info',choices:[c('平時備份重要資料，更新軟體並保護密碼','你把備份和更新加入日常習慣。資料能否取回，也值得在平時確認。',['backup'],5,5),c('手機一直都很好，不必備份','故障與資安事件不會先預告。你把備份重要資料與更新軟體列入待辦。',[],0,0,1)]},
  careSupplies:{title:'每個人的需要不一樣',text:'奶奶需要處方藥，孩子有自己的照護用品，家裡也養了一隻貓。要怎麼一起準備？',source:'prepare',choices:[c('確認個別照護與寵物需求，檢查物品效期','你把藥品、照護用品與寵物所需加入清單，依專業指示與保存需求準備，不自行調整用藥。',['careSupplies'],5,10),c('每個人都裝一模一樣的用品','通用清單之外，也要考慮個別需求。你邀請家人一起確認，而不是假設人人相同。',[],0,0,1)]}
 };
-export function initialState(route='quake',random=Math.random){return {version:3,chapter:route==='quake'?{revision:1,pack:[],packDraft:[],radioPower:false,radioBand:null,packConfirmed:false}:null,route,stage:'prepare',x:240,y:360,ready:0,care:0,risk:0,flags:[],done:[],history:[],sideEvents:drawSideEvents(route,random),ended:false};}
+export function initialState(route='quake',random=Math.random){
+ const sideEvents=drawSideEvents(route,random);
+ const chapter=['quake','military'].includes(route)?{kind:route,revision:1,pack:[],packDraft:[],radioPower:false,radioBand:null,packConfirmed:false}:null;
+ if(route==='military')Object.assign(chapter,{scenario:random()<.5?'stay':'relocate',airAlert:random()<.5,encounter:random()<.5?'clear':'blocked'});
+ return {version:3,chapter,route,stage:'prepare',x:240,y:360,ready:0,care:0,risk:0,flags:[],done:[],history:[],sideEvents,ended:false};
+}
 export function applyChoice(state,id,index){const event=resolveEvent(state,id),choice=event?.choices[index];if(!choice||!availableChoice(state,choice)||state.done.includes(id))return state;return {...state,ready:Math.min(100,state.ready+choice.ready),care:Math.max(0,Math.min(100,state.care+choice.care)),risk:state.risk+choice.risk,flags:[...new Set([...state.flags,...choice.flags])],done:[...state.done,id],history:[...state.history,{id,index,label:event.title,decision:choice.text,outcome:choice.result}]};}
 export function ending(state){if(state.risk>=6)return {icon:'🌱',title:'平安，從下一次準備開始',text:'你完成了演練，也發現幾個容易猶豫的時刻。把回顧中的一件事帶回生活，下次就多一份把握。'};if(state.flags.includes('plan')&&state.flags.includes('bag')&&state.flags.includes('comfort')&&state.risk<=1)return {icon:'🏡',title:'有準備，也有彼此',text:'平時準備在關鍵時刻派上用場，你也記得照顧家人的感受。今天的結局，是你們一起完成的。'};if(state.care>=60)return {icon:'🤝',title:'一起走，就多一份安心',text:'你用查證、陪伴與合作度過這次演練。再補齊物資與聯絡約定，下一次會更從容。'};return {icon:'☀️',title:'把今天的一步，帶回日常',text:'你完成了這次情境的應對。回頭看看做過的選擇，找出下一件可以和家人一起完成的準備。'};}
 
@@ -134,6 +139,8 @@ export function chapterEnding(state){
 export function resolveEvent(state,id){
  const original=EVENTS[id];if(!original)return null;
  const e={...original,choices:original.choices.map(choice=>({...choice}))};
+ if(state.route==='military'&&!isMilitaryState(state)&&id==='power'){e.title='網路斷斷續續';e.text='你暫時在遠離門窗的安全處，手機網路不穩。如何取得下一步可靠資訊？';}
+ if(isMilitaryState(state))return resolveMilitaryEvent(state,id,e);
  if(state.route!=='quake'||!state.chapter)return e;
  if(id==='power'){
   e.title='先讓眼前，亮起來';
@@ -147,4 +154,178 @@ export function resolveEvent(state,id){
  if(id==='rumor'&&state.flags.includes('packedRadio'))e.choices.push({...c('用隨身收音機對照資訊，再向現場人員確認','你把背包裡的備援工具用在路上。這次沒有依賴不明群組訊息，而是確認可靠來源後再行動。',['checked','usedPortableRadio'],5,10),requires:'packedRadio'});
  if(id==='child'&&state.flags.includes('packedToy'))e.choices.push({...c('拿出小熊，聽小晴說說今天的害怕','你沒有要求她立刻不害怕。小熊是一個熟悉的陪伴，你也認真聽她說，把安頓情緒的時間留給彼此。',['comfort','usedToy'],0,20),requires:'packedToy'});
  return e;
+}
+
+
+// Civilian military-crisis chapter: no tactical missions or real military data.
+Object.assign(EVENTS,{
+ mFamily:q('先確認身邊的人','你們暫時在遠離門窗、確認安全的室內區域。小晴一直看手機，阿嬤問起爸爸。爸爸出門到里辦公處辦事，現在暫時斷訊。','mind',[
+  c('確認需求、讓小晴待在身邊，一起記住聯絡備案','你讓家人知道目前已知與未知的事，不派孩子獨自尋人，也不承諾無法保證的結果。',['mFamilyChecked','childRole'],0,15),
+  c('請小晴獨自到街上看看爸爸在哪裡','你停下這個打算，讓小晴回到身邊。家人沒有分頭冒險，你改依可靠資訊安排下一步。',['mFamilyChecked'],0,0,2)
+ ]),
+ mSignal:q('群組裡的「內部消息」','手機斷斷續續收到消息：有人聲稱「政府已投降，別理警報」，另一則要求掃陌生 QR code 填個資才能領物資。兩者都不是可信的官方指示。','info',[
+  c('不轉傳、不掃碼，從可靠管道確認','你拒絕以投降假消息或不明登記連結作為行動依據，改查可靠資訊；斷網時可使用收音機等備援管道。',['mSignalChecked','mVerified'],5,10),
+  c('很多人傳就相信，並把個資交給陌生連結','這只是遊戲敘事，不會要求你輸入真實個資。你停止操作、不再轉傳，改從可靠管道確認。',['mSignalChecked'],0,0,2)
+ ]),
+ mBroadcast:q('斷訊時，留下可靠的資訊管道','【虛構演練廣播】地方單位正在發布所在區域的安排。收聽後仍要配合現場指引，不能把其他地區的消息當成自己的撤離指示。','disaster',[
+  c('確認這次所在地的安排，和家人一起記下','你把這次情境的安排和家人確認，繼續留意官方更新。這段是演練劇情，不是即時廣播。',['mBroadcastKnown'],5,10),
+  c('只聽到「危機」兩字，就決定自行開車外出','危機不代表每個地方都應立刻外出。你重新聽完所在地安排，改依這次的指引判斷。',['mBroadcastKnown'],0,0,1)
+ ]),
+ mAlert:q('此刻，收到防空警報','【防空情境演練，非即時警報】你們仍在室內。此劇情明示：社區內有標示的地下防空空間可由已確認可通行的樓梯到達，不必穿越街區。','disaster',[
+  c('就近依標示與引導避難，不搭電梯','你和家人依本次已確認可用的通道進入防空空間。若現實中無法移動，應依當下環境採合適掩蔽，而非為取物延誤。',['mShelterSought'],5,10),
+  c('到戶外公園等，順便拍下周圍軍事活動','戶外公園不等於這次合適的防空掩蔽。你停止拍攝，改依現場引導進入避難空間。',['mShelterSought'],0,0,2)
+ ]),
+ mPosition:q('在防空空間裡，怎麼安頓？','你已在由人員引導的地下防空空間。警報尚未解除，周圍有遠離門窗的靠牆位置。','disaster',[
+  c('依引導靠牆坐下、保護頭部，維持避難姿勢','你採取室內防空避難姿勢，和家人一起配合現場人員。遊戲不以反應速度判定安全。',['mPositioned'],5,10),
+  c('站在出入口看外面發生什麼','你離開出入口，回到合適的避難位置。不為了觀察外界而增加暴露風險。',['mPositioned'],0,0,1)
+ ]),
+ mWait:q('暫時安靜了，可以走嗎？','有人說外面沒聲音，群組也叫大家快出去。此刻尚未收到可靠的防空警報解除訊息。','disaster',[
+  c('繼續避難，等可靠的解除訊息與現場指示','你沒有把安靜、轉傳量或陌生訊息當成警報解除。家人也知道先留在這裡。',['mWaited'],0,10),
+  c('外面安靜就當作解除，準備離開','安靜不是解除警報的依據。你停下腳步，繼續依現場指示避難。',['mWaited'],0,0,2)
+ ]),
+ mClearance:q('收到解除訊息之後','【虛構劇情更新】已收到可靠的防空警報解除訊息，現場人員也正在說明目前可採取的行動。解除不代表所有道路與住家都已安全。','disaster',[
+  c('先確認後續指示，再決定留在室內或依安排撤離','你把「警報解除」和「後續行動條件」分開確認；接下來依所在地安排繼續故事。',['mAirCleared'],0,10),
+  c('解除就直接返回任何想去的地方','你重新確認現場安排，不把警報解除當成任意移動的許可。',['mAirCleared'],0,0,1)
+ ]),
+ mDecision:q('依所在區域的安排，決定下一步','你已確認家人需求與可靠資訊。現在要依這次所在地的實際安排，判斷留在安全住家或前往救濟站。','disaster',[
+  c('照這次已確認的安排，和家人一起行動','你沒有套用其他地區的指示，也不靠不明社群消息改變路線。',['mDecisionConfirmed'],5,10),
+  c('不管所在地安排，先跟著人群移動','你停下來重新確認，改依這次可靠的所在地安排。人群往哪裡走，不等於適合自己的安全路線。',['mDecisionConfirmed'],0,0,2)
+ ]),
+ mEncounter:q('街口出現疑似軍事活動','【虛構街區事件】你和家人沿已確認的路線行動時，遠處街口出現疑似軍事活動。你不需要靠近、判斷隊伍身分或拍攝。','disaster',[
+  c('不靠近圍觀、不拍攝，依現場可行條件避開','你先保護家人，不以外觀自行辨認隊伍，也不把軍事動態上傳。接下來依是否能安全離開採取行動。',['mEncounterHandled','mPrivacyGuard'],5,10),
+  c('走近詢問身分、直播給群組看','你停止靠近與拍攝。不公開軍事動態，也不為了確認身分讓家人暴露在風險中。',['mEncounterHandled'],0,0,2)
+ ]),
+ mCoverWait:q('在安全掩蔽處，等下一步','你們暫時無法沿原路安全離開，已留在安全、遠離門窗的掩蔽處。【劇情更新】現場人員確認另一條指定步道可通行，並給出引導。','disaster',[
+  c('確認引導後，再沿可通行路線遠離','你沒有穿越未確認的區域，也沒有因焦慮而自行離開掩蔽。這次路線在確認後才重新開放。',['mPassageConfirmed'],5,10),
+  c('想在還沒有指引時先衝過街口','你取消這個打算，留到收到確認後才依引導移動。',['mPassageConfirmed'],0,0,2)
+ ]),
+ mRoute:q('封鎖線之外，有另一條路','原巷口仍封鎖；現場人員標示的替代步道可通行。這是本次情境中通往救濟站的指定路線。','disaster',[
+  c('依引導繞行，不穿越封鎖區','你沿確認可通行的步道前進，沒有為了走近路而跨越封鎖。',['mRouteChecked'],5,5),
+  c('覺得看不到人就鑽過封鎖線','你退回指定步道。看不到人，不代表區域已安全或獲准通行。',['mRouteChecked'],0,0,1)
+ ]),
+ mLinkPlan:q('約定好的聯絡方式，派上用場','工作人員透過你們事先約定的聯絡安排確認：爸爸已在社區救濟站登記，會在那裡等你們。','prepare',[
+  c('確認必要訊息，照指定路線一起前往','你們不再分頭找人，事前約定幫助這次聯絡。',['familyLocated','usedPlan'],0,15),
+  c('仍打算離開指定路線，另外到街上找','你重新確認已收到的可靠訊息，取消不必要的尋找。',['familyLocated'],0,0,1)
+ ]),
+ mLinkRequest:q('斷訊時，沒有約定怎麼辦？','你們沒有事先約定聯絡備案，現在仍找不到爸爸。附近已開設的聯絡協助站有人員可幫忙，路線也已確認可通行。','prepare',[
+  c('家人保持同行，到協助站詢問','你們先尋求可信的協助，不派孩子獨自外出，也不分頭找人。',['mNeedsContactHelp'],0,5),
+  c('請小晴自己找另一條街','你取消這個安排，讓小晴待在身邊，改向可信人員詢問。',['mNeedsContactHelp'],0,0,2)
+ ]),
+ mLinkHelp:q('透過協助站，重新連起來','協助站人員透過本次演練的登記資料確認：爸爸已在社區救濟站。沒有要求你公開完整個資到社群。','prepare',[
+  c('確認必要資訊，再一起前往','你們透過可信協助確認了家人的下落，也把事先約定聯絡備案記進下次準備。',['familyLocated','contactHelp'],0,10),
+  c('把家人的全部資料公開貼到社群','你停止公開個資，改由現場可信人員協助處理必要資訊。',['familyLocated','contactHelp'],0,0,1)
+ ]),
+ mRelief:q('救濟站，和防空空間不一樣','你們抵達本次已開設的社區救濟站，依序登記安置需求。爸爸也已在這裡。這是生活安置的安排，不是用來取代警報中的防空掩蔽。','disaster',[
+  c('依序登記安置、照護與聯絡需求','你提供必要資料並確認可用服務，沒有把未知的社群連結當成登記管道。',['mReliefRegistered'],5,15),
+  c('不問服務內容，只因名字有「站」就認為用途相同','你先向工作人員確認用途與安排，再完成必要登記。',['mReliefRegistered'],0,0,1)
+ ]),
+ mSupplies:q('把今晚需要的事，逐一確認','家人已在本次安排的安全處安頓。你要確認飲水、食物、阿嬤的個人照護需求，以及不足時的可靠協助。','disaster',[
+  {...c('使用已準備的用品，確認個別需求','你從已備好的物品中確認需要的用品，依原專業指示與保存需求處理，不自行調整藥物。',['careSettled','mUsedSupplies'],0,10),requires:'packedMedicine'},
+  c('登記需求，確認官方救濟或物資配售安排','你依公布與現場安排取得協助，不自行返回不安全的住家取物，也不在警報中為搶物資外出。',['careSettled','mSupplyHelp'],0,10),
+  c('看到陌生訊息就付錢，搶先登記領取','你停止提供個資或付款，改向可信管道確認供應與配售資訊。',['careSettled','mSupplyHelp'],0,0,1)
+ ]),
+ mContact:q('終於有一段可靠的聯絡','【劇情更新】通訊短暫恢復，你可以向已知的親友聯絡方式簡短更新狀況。這不是公開直播或分享軍事動態的時刻。','prepare',[
+  c('簡短報平安，不附軍事影像與敏感位置資訊','你以必要資訊讓親友知道狀況，不公開軍事動態或他人的個資。',['mContacted','familyLocated'],0,10),
+  c('把沿途疑似軍事活動的影像一起公開','你撤回這個打算，只保留必要的平安訊息，不傳播軍事動態。',['mContacted','familyLocated'],0,0,2)
+ ]),
+ mNight:q('今天，先把彼此接住','家人完成安頓與聯絡。事情還沒有全部結束，你們也不假設明天一定恢復正常，但已知道接下來要持續確認可靠資訊、照顧彼此。','mind',[
+  c('約好休息、輪流確認可靠資訊，再一起整理準備','你把準備與休息放進可持續的日常，不讓家人被沒有來源的訊息淹沒。',['mDayClosed'],0,10),
+  c('每一則消息都重複看，直到沒力氣休息','你留意到焦慮正在累積，決定減少重複資訊、安排休息與陪伴；有需要時尋求專業協助。',['mDayClosed'],0,0,1)
+ ])
+});
+
+export function isMilitaryState(state){return state?.route==='military'&&state.chapter?.kind==='military'&&state.chapter.revision===1;}
+export function militaryCode(state){const c=state.chapter;return `M-${c.scenario==='stay'?'S':'R'}-${c.airAlert?'A':'N'}${c.scenario==='relocate'?`-${c.encounter==='blocked'?'B':'C'}`:''}`;}
+export function militaryDepartureReady(state){return isMilitaryState(state)&&['military','mFamily','mSignal','mBroadcast'].every(id=>state.done.includes(id))&&(!state.chapter.airAlert||state.done.includes('mClearance'));}
+export function militaryArrivalReady(state){return isMilitaryState(state)&&state.chapter.scenario==='relocate'&&state.stage==='street'&&state.done.includes('mDecision')&&state.done.includes('mEncounter')&&(state.chapter.encounter!=='blocked'||state.done.includes('mCoverWait'))&&state.done.includes('mRoute')&&state.flags.includes('familyLocated');}
+export function militaryTask(state){
+ const done=id=>state.done.includes(id),task=(id,label)=>({id,label});
+ if(state.ended)return task('end','這一段演練完成了，看看你們如何取得資訊與照顧彼此。');
+ if(state.stage==='prepare')return task('door','整理背包、討論聯絡備案，準備好後到玄關開始。');
+ if(state.stage==='bunker'){
+  if(!done('mPosition'))return task('mPosition','依引導安頓，採取室內防空避難姿勢。');
+  if(!done('mWait'))return task('mWait','警報尚未解除；確認為什麼不能依群組消息離開。');
+  return task('mClearance','查看這次劇情中的可靠解除訊息與後續指示。');
+ }
+ if(state.stage==='cover')return task('mCoverWait','暫時無法安全離開 · 留在掩蔽處，確認可信的通行指引。');
+ if(state.stage==='crisis'){
+  if(!done('mFamily'))return task('mFamily','先在安全室內確認家人狀況，不派孩子獨自尋人。');
+  if(!done('mSignal'))return task('mSignal','判讀群組中的消息與可疑登記連結。');
+  if(!done('mBroadcast'))return task('mRadio','打開收音機、選演練防災廣播，確認所在地安排。');
+  if(state.chapter.airAlert&&!done('mAlert'))return task('mAlert','收到防空警報 · 就近依標示與引導避難。');
+  return task('door','已確認可靠資訊與家人狀況，依所在地安排決定下一步。');
+ }
+ if(state.stage==='street'){
+  if(!done('mEncounter'))return task('mEncounter','街口出現疑似軍事活動 · 先確認如何避免接近與暴露。');
+  if(!done('mRoute'))return task('mRoute','沿現場確認的安全步道遠離，不穿越封鎖區。');
+  if(!state.flags.includes('familyLocated'))return task(done('mLinkRequest')?'mLinkHelp':'mLink','確認爸爸的下落，不分頭冒險尋找。');
+  return task('mRelief','依指定路線前往救濟站，登記安置與照護需求。');
+ }
+ if(!done('mSupplies'))return task('mSupplies','確認生活與個人照護用品，不足時透過可信管道求助。');
+ if(!done('child'))return task('child','聽小晴說說感受，留下陪伴與休息的時間。');
+ if(!done('mContact'))return task('mContact','通訊恢復後簡短報平安，不公開軍事動態與個資。');
+ return task('mNight','和家人完成今天的小結，看看這段經歷留下了什麼。');
+}
+function resolveMilitaryEvent(state,id,e){
+ const stay=state.chapter.scenario==='stay';
+ if(id==='military')e.text='【軍事侵略情境演練】你和家人在家，收到可靠的軍事危機資訊，網路開始不穩。附近有疑似軍事活動；此刻尚無防空警報。你不需要靠近辨識或拍攝，先在安全、遠離門窗的地方確認下一步。';
+ if(id==='mBroadcast')e.text=stay?'【虛構演練廣播】你所在地的住家目前仍可安全停留，也沒有撤離指示。請留在安全室內、確認生活與個人用品，持續留意更新；後續若收到警報或撤離安排，須依最新條件行動。':'【虛構演練廣播】此處住宅已不宜繼續停留。現場人員已確認樓梯與通往社區救濟站的指定路線可通行。請依引導安排安置；若後續出現防空警報，先就近避難。';
+ if(id==='mDecision'){
+  e.title=stay?'這次，先留在安全室內':'這次，依確認路線前往救濟站';
+  e.text=stay?'【所在地安排】本次住家可安全停留，沒有撤離指示。你們不必為了去「找避難所」而穿越街區；仍要留意後續更新。':'【所在地安排】本次住家不宜停留，現場已確認指定路線可通行。請依引導前往已開設的社區救濟站，不為取物返回危險建物。';
+ }
+ if(id==='mEncounter'){
+  e.text+=state.chapter.encounter==='blocked'?'目前暫時沒有可安全離開的通道；附近有可用的安全、遠離門窗的掩蔽位置。':'現場人員已確認另一條可通行的路線，可避開街口並遠離此區。';
+  e.choices[0].text=state.chapter.encounter==='blocked'?'不接近或拍攝，先到安全掩蔽位置等待指引':'不接近或拍攝，沿已確認可通行的路線遠離';
+ }
+ if(id==='mSupplies'&&stay){
+  e.title='在家，把需要逐一確認';
+  e.text='這次仍在安全住家。先確認飲水、食物與阿嬤的個人用品；不足時透過可信管道登記需求、了解官方物資配售安排，不在警報中擅自外出。';
+  e.choices[0]={...c('使用家中已備的儲備，確認個別照護需求','平時準備的居家儲備幫上忙。你也確認每個人的用品，不自行調整藥物；特殊需求仍可向專業人員求助。',['careSettled','mUsedSupplies'],0,10),requires:'stock'};
+ }
+ if(id==='child'){
+  e.text=stay?'小晴拉住你的衣角，你們已在家中安全處安頓。爸爸目前在里辦公處；下一段劇情會處理通訊恢復後的聯絡。':'小晴拉住你的衣角。你們已在救濟站安頓，爸爸也在這裡；她仍想說說剛才遇到的事。';
+  if(state.flags.includes('packedToy'))e.choices.push({...c('拿出小熊，聽她說話，不催她立刻不害怕','你把熟悉的小物與陪伴留給小晴，讓她有機會表達感受。',['comfort','usedToy'],0,20),requires:'packedToy'});
+ }
+ if(id==='mContact'&&stay)e.text='【劇情更新】通訊短暫恢復，爸爸透過已知的聯絡方式告知自己在里辦公處安全停留。你們確認彼此狀況，不為團聚而在未確認的情況下移動。';
+ return e;
+}
+export function militaryEnding(state){
+ const has=id=>state.flags.includes(id);
+ if(state.risk>=7)return {icon:'🌱',title:'把未查證的消息，停在這裡',text:'你完成了演練，也看見幾個容易被焦慮帶著走的時刻。下次先確認來源與行動條件，就能少一段無方向的奔波。'};
+ if(has('bag')&&has('mVerified')&&has('comfort')&&state.risk<=2)return {icon:'🏡',title:'守住日常，也守住彼此',text:'你把準備、資訊與家人的感受放在一起考慮。這段日子仍有未知，但你們知道可以依可靠指引，一步一步照顧彼此。'};
+ if(has('contactHelp'))return {icon:'🤝',title:'斷訊之後，仍然找得到彼此',text:'你沒有讓家人分頭冒險。可信的協助讓聯絡重新接上，也留下平時可以再約好的下一步。'};
+ if(state.chapter.scenario==='stay')return {icon:'⌂',title:'留在安全處，等到下一步',text:'你沒有把軍事危機一律當成出門的理由，而是依這次住家與警戒條件留在安全處，持續確認更新。'};
+ return {icon:'☀️',title:'走過確認的路，把日子接回來',text:'你們避開未確認區域，依指引抵達救濟站。接下來仍要留意變化，也記得為家人保留休息與陪伴。'};
+}
+export function militaryEpilogues(state){
+ const has=id=>state.flags.includes(id),stay=state.chapter.scenario==='stay';
+ return [
+  {who:'資訊怎麼影響行動',text:has('mVerified')?'你沒有採信投降假消息或不明領物資連結，而是使用可靠資訊管道。':'你在回饋中重新查證消息，之後改依可信安排，不再跟著群組轉傳行動。'},
+  {who:'這次為什麼留或走',text:stay?'住家可安全停留、沒有撤離指示，你們留在安全室內並持續留意更新。':'住家不宜停留，現場確認路線後，你們才依引導前往救濟站。'},
+  {who:'防空警報與後續安排',text:state.chapter.airAlert?'你們先進入合適防空空間，等可靠解除訊息，再確認後續指示。':'本次沒有額外防空警報，沒有把軍事危機與警報混為同一件事。'},
+  {who:'街口的軍事活動',text:stay?'本次沒有外出穿越街區。你們不為觀察或拍攝軍事活動而離開安全處。':state.chapter.encounter==='blocked'?'暫時無法離開時，你們先掩蔽，收到可信通行指引後才繼續。':'有可通行路線時，你們遠離街口，不靠近圍觀或拍攝。'},
+  {who:'家人的聯繫與照顧',text:stay?'爸爸在里辦公處報平安，你們沒有為團聚而在未確認時冒險移動。':has('usedPlan')?'事前的家庭聯絡備案，幫助你們確認爸爸已在救濟站。':'協助站幫你們確認爸爸的下落，沒有把孩子派去獨自尋人。'},
+  {who:'把今天帶回日常',text:has('comfort')?'你確認用品，也留時間傾聽小晴。準備不只有物資，還有願意照顧彼此的空間。':'你先安頓了家人；回顧時，也記下之後可以再找時間聽小晴說說感受。'}
+ ];
+}
+
+// A malformed or obsolete save must never strand the player or render saved HTML.
+export function restoreSavedState(value){
+ try {
+  const raw=typeof value==='string'?JSON.parse(value):value;
+  if(!raw||![2,3].includes(raw.version)||!Object.hasOwn(ROUTES,raw.route)||!['prepare','crisis','street','shelter','bunker','cover'].includes(raw.stage))return null;
+  if(![raw.x,raw.y,raw.ready,raw.care,raw.risk].every(Number.isFinite)||raw.x<0||raw.x>960||raw.y<0||raw.y>600||raw.ready<0||raw.ready>100||raw.care<0||raw.care>100||raw.risk<0||typeof raw.ended!=='boolean')return null;
+  if(!Array.isArray(raw.flags)||!raw.flags.every(flag=>typeof flag==='string')||!Array.isArray(raw.done)||new Set(raw.done).size!==raw.done.length||!raw.done.every(id=>Object.hasOwn(EVENTS,id)))return null;
+  if(!Array.isArray(raw.sideEvents)||raw.sideEvents.length!==2||new Set(raw.sideEvents).size!==2||!raw.sideEvents.every(id=>Object.hasOwn(EVENTS,id)))return null;
+  const state={...raw,version:3,chapter:raw.version===2?null:(raw.chapter??null)};
+  if(state.chapter){
+   const ch=state.chapter,validPack=items=>Array.isArray(items)&&items.length<=PACK_LIMIT&&new Set(items).size===items.length&&items.every(id=>PACK_ITEMS.some(item=>item.id===id));
+   if(!['quake','military'].includes(state.route)||ch.revision!==1||!validPack(ch.pack)||!validPack(ch.packDraft)||typeof ch.radioPower!=='boolean'||![null,'music','emergency'].includes(ch.radioBand)||typeof ch.packConfirmed!=='boolean')return null;
+   if(state.route==='military'&&(!isMilitaryState(state)||!['stay','relocate'].includes(ch.scenario)||typeof ch.airAlert!=='boolean'||!['clear','blocked'].includes(ch.encounter)))return null;
+  }
+  if(['bunker','cover'].includes(state.stage)&&!isMilitaryState(state))return null;
+  if(!Array.isArray(state.history)||new Set(state.history.map(h=>h?.id)).size!==state.history.length||!state.history.every(h=>h&&Object.hasOwn(EVENTS,h.id)&&Number.isInteger(h.index)&&h.index>=0&&resolveEvent(state,h.id)?.choices[h.index]&&['label','decision','outcome'].every(key=>h[key]===undefined||typeof h[key]==='string')))return null;
+  return state;
+ }catch{return null;}
 }

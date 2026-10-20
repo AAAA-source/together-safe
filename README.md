@@ -6,7 +6,7 @@
 
 **[開啟網頁遊戲](https://aaaa-source.github.io/together-safe/)** · **[下載單檔離線版](一起平安-離線版.html)** · [English quick guide](#english-quick-guide)
 
-> 本文件是玩家手冊。地震示範章節的新版內容，會在專案更新並成功部署後出現在網頁版。
+> 本文件是玩家手冊。地震與軍事完整章節的新版內容，會在專案更新並成功部署後出現在網頁版。
 
 ## 第一次玩，從哪裡開始？
 
@@ -53,9 +53,23 @@
 
 ### 看看每個人的後日談
 
-完成安頓、報平安與家庭小結後，會得到一個主要結局，以及照明、爸爸、阿嬤、小晴與鄰里的個別後日談。地震章節有五種主要結局，其餘情境保留四種練習結局。
+完成安頓、報平安與家庭小結後，會得到一個主要結局，以及照明、爸爸、阿嬤、小晴與鄰里的個別後日談。地震與軍事章節各有五種主要結局，其餘情境保留四種練習結局。
 
 沒有必要追求一次「全對」。回顧會說明哪些準備派上用場、哪些協助接住了你們，以及下次可以一起完成的一件事。
+
+## 軍事章節：斷訊之後，仍有彼此
+
+首頁選擇 **「軍事章節 · 斷訊之後，仍有彼此」**，可選一條練習路線，或隨機開始。
+
+- **留在安全住家**：沒有撤離指示、住家仍可安全停留時，先確認資訊、用品與家人需求。
+- **依指引撤離**：住家不宜停留、現場確認路線後，依安排前往救濟站。
+- **出現防空警報**：先到合適防空空間避難，等可靠解除訊息，再確認後續指示。警報中不會讓角色四處走動；按 **E**、互動按鈕或情境標記繼續。
+- **街口遇到疑似軍事活動**：有確認可通行的路線就遠離；暫時無法離開時先掩蔽，等可信的通行指引。不要靠近辨識、圍觀或拍攝上傳軍事動態。
+- **斷訊、假消息與物資**：不依投降假消息或陌生 QR code 行動，使用可靠資訊管道，依官方安排取得救濟或配售協助。
+
+章節有五種主要結局與六項後日談。實際能否留或走，取決於本次劇情給出的條件；不把軍事危機一律寫成外出撤離，也不將救濟站當成防空掩蔽的替代品。
+
+畫面中的 `M-S-A` 等代碼代表本次練習路線，可在回報問題時附上，方便測試者重現。所有地點、警報、通行資訊與人物均為虛構，不是即時災情或真實導航。
 
 ## 語言與 Google 翻譯
 
@@ -81,7 +95,7 @@
 
 遊戲會嘗試在目前瀏覽器自動儲存進度，包括背包未完成的整理與收音機設定。關掉再開可以接續；選擇新的一局會取代原存檔。不同裝置、瀏覽器或網頁版與本機檔案之間不會同步，清除網站資料也可能清除存檔。
 
-從舊版接續的地震存檔會保留原來的簡短路線；要體驗新版章節，請按 **重新開始**，再選地震示範章節。
+從舊版接續的地震或軍事存檔會保留原來的路線；要體驗完整新版，請按 **重新開始**，再選相應章節。
 
 ## 六種情境，有不同的行動方式
 
@@ -94,7 +108,7 @@
 | 軍事侵略與斷訊 | 遠離軍事活動，透過可靠管道獲取資訊與安排 |
 | 資安與可疑訊息 | 可疑連結、帳號與個資保護、資訊查證 |
 
-目前有 34 個選擇事件，加上背包與收音機互動；一局只會遇到其中一部分。防空地下空間、海嘯高處與災後收容／救濟地點不會混用。錯誤選擇提供解析與補救，不描繪傷亡。
+目前有 52 個選擇事件，加上背包與收音機互動；一局只會遇到其中一部分。防空地下空間、海嘯高處與災後收容／救濟地點不會混用。錯誤選擇提供解析與補救，不描繪傷亡。
 
 ## 一起玩的小建議
 
@@ -104,7 +118,7 @@
 
 ## English quick guide
 
-**Together, Safe** is a browser-based 2D safety learning game for families. Start with the featured earthquake chapter, or choose a random practice scenario.
+**Together, Safe** is a browser-based 2D safety learning game for families. Start with the featured earthquake or civilian military-crisis chapter, or choose a random practice scenario.
 
 - Move with the arrow keys or WASD. Press E or Space near a marker to interact.
 - On touch devices, tap the ground or a marker, or hold the directional buttons.
@@ -122,4 +136,4 @@ This independent educational game uses fictional places and events. It does not 
 
 參考來源與編輯原則見 [SOURCES.md](SOURCES.md)。原創程式與視覺資產採 [MIT License](LICENSE)，政府參考資料依其各自授權條款。
 
-歡迎在 Issues 回報卡關、操作或文字問題；安全知識的修改建議請附官方來源。開發者請參閱 [開發與測試說明](docs/DEVELOPMENT.md)，自行部署請參閱 [發布教學](docs/DEPLOYMENT.md)。
+歡迎在 Issues 回報卡關、操作或文字問題；安全知識的修改建議請附官方來源。開發者請參閱 [開發與測試說明](docs/DEVELOPMENT.md)，自行部署請參閱 [發布教學](docs/DEPLOYMENT.md)，協助驗收請參閱 [測試者指南](docs/TESTING.md)。
